@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Register - HireHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .role-card {
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 2px solid #dee2e6;
+    }
+    .role-card:hover {
+        border-color: var(--hirehub-primary);
+        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.15);
+    }
+    .role-card .role-icon { font-size: 2.5rem; color: var(--hirehub-primary); }
+    #registration-form { display: none; }
+    .reg-card .card-header { border-radius: 0.5rem 0.5rem 0 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div id="role-selection">
+            <h2 class="mb-4">Join HireHub</h2>
+            <p class="text-muted mb-4">Choose your role to get started.</p>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="card role-card h-100" data-role="seeker">
+                        <div class="card-body text-center">
+                            <div class="role-icon"><i class="bi bi-briefcase-fill"></i></div>
+                            <h5 class="card-title mt-2">Job Seeker</h5>
+                            <p class="card-text small text-muted">Find and apply for jobs</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card role-card h-100" data-role="provider">
+                        <div class="card-body text-center">
+                            <div class="role-icon"><i class="bi bi-building"></i></div>
+                            <h5 class="card-title mt-2">Job Provider</h5>
+                            <p class="card-text small text-muted">Post jobs and hire talent</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card role-card h-100" data-role="mentor">
+                        <div class="card-body text-center">
+                            <div class="role-icon"><i class="bi bi-mortarboard-fill"></i></div>
+                            <h5 class="card-title mt-2">Mentor</h5>
+                            <p class="card-text small text-muted">Guide job seekers</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center mt-4 mb-0">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+        </div>
+
+        <div id="registration-form">
+            <div class="card reg-card">
+                <div class="card-header">
+                    <button type="button" class="btn btn-sm btn-light me-2" id="back-btn"><i class="bi bi-arrow-left"></i></button>
+                    <span id="role-title">Register</span>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" id="selected-role" value="seeker">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_username" class="form-label">Username</label>
+                                {{ form.username }}
+                                {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_email" class="form-label">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password1" class="form-label">Password</label>
+                                {{ form.password1 }}
+                                {% if form.password1.errors %}<div class="text-danger small">{{ form.password1.errors }}</div>{% endif %}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password2" class="form-label">Confirm Password</label>
+                                {{ form.password2 }}
+                                {% if form.password2.errors %}<div class="text-danger small">{{ form.password2.errors }}</div>{% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="id_phone" class="form-label">Phone</label>
+                            {{ form.phone }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Create Account</button>
+                    </form>
+
+                    <p class="mt-3 mb-0 text-muted small">Already have an account? <a href="{% url 'login' %}">Login</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var roleCards = document.querySelectorAll('.role-card');
+    var roleSelection = document.getElementById('role-selection');
+    var registrationForm = document.getElementById('registration-form');
+    var selectedRoleInput = document.getElementById('selected-role');
+    var backBtn = document.getElementById('back-btn');
+    var roleTitle = document.getElementById('role-title');
+    var titles = { seeker: 'Job Seeker Registration', provider: 'Job Provider Registration', mentor: 'Mentor Registration' };
+
+    roleCards.forEach(function(card) {
+        card.addEventListener('click', function() {
+            var role = this.getAttribute('data-role');
+            selectedRoleInput.value = role;
+            roleTitle.textContent = titles[role];
+            roleSelection.style.display = 'none';
+            registrationForm.style.display = 'block';
+        });
+    });
+
+    backBtn.addEventListener('click', function() {
+        registrationForm.style.display = 'none';
+        roleSelection.style.display = 'block';
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ company.name }} - HireHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">{{ company.name }}</h3>
+            </div>
+            <div class="card-body">
+                <p><strong>Location:</strong> {{ company.location }}</p>
+                {% if company.industry %}
+                    <p><strong>Industry:</strong> {{ company.industry }}</p>
+                {% endif %}
+                {% if company.founded_year %}
+                    <p><strong>Founded:</strong> {{ company.founded_year }}</p>
+                {% endif %}
+                {% if company.employee_count %}
+                    <p><strong>Employees:</strong> {{ company.employee_count }}</p>
+                {% endif %}
+                {% if company.website %}
+                    <p><strong>Website:</strong> <a href="{{ company.website }}" target="_blank">{{ company.website }}</a></p>
+                {% endif %}
+                
+                <hr>
+                
+                <h5>About</h5>
+                <p>{{ company.description|linebreaks }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h5>Job Openings</h5>
+                <p class="text-muted">{{ jobs|length }} job{{ jobs|length|pluralize }} available</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if jobs %}
+<div class="row mt-4">
+    <div class="col-12">
+        <h4>Available Jobs</h4>
+        {% for job in jobs %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>{{ job.title }}</h5>
+                <p>
+                    <i class="bi bi-geo-alt"></i> {{ job.location }}<br>
+                    <i class="bi bi-briefcase"></i> {{ job.job_type }}
+                </p>
+                <a href="{% url 'job_detail' job.id %}" class="btn btn-primary">View Details</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+

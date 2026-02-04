@@ -1,0 +1,524 @@
+{% extends 'base.html' %}
+
+{% block title %}Chat Assistant - HireHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        max-width: 800px;
+        margin: 0 auto;
+        height: calc(100vh - 250px);
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .chat-header {
+        background-color: var(--hirehub-primary, #0d6efd);
+        color: white;
+        padding: 1.5rem;
+        border-radius: 1rem 1rem 0 0;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .chat-avatar {
+        width: 50px;
+        height: 50px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+    }
+    
+    .chat-avatar i {
+        color: var(--hirehub-primary, #0d6efd);
+    }
+    
+    .chat-status {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        opacity: 0.9;
+    }
+    
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        background: #4ade80;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+    }
+    
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .message {
+        display: flex;
+        gap: 0.75rem;
+        max-width: 85%;
+        animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .message.user {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+    
+    .message-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .message.bot .message-avatar {
+        background: var(--hirehub-primary, #0d6efd);
+        color: white;
+    }
+    
+    .message.user .message-avatar {
+        background: #198754;
+        color: white;
+    }
+    
+    .message-content {
+        background: white;
+        padding: 1rem 1.25rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .message.user .message-content {
+        background: #0d6efd;
+        color: white;
+        border-radius: 1rem 1rem 0 1rem;
+    }
+    
+    .message.bot .message-content {
+        border-radius: 1rem 1rem 1rem 0;
+    }
+    
+    .message-content p {
+        margin: 0;
+        line-height: 1.5;
+    }
+    
+    .message-content p:not(:last-child) {
+        margin-bottom: 0.75rem;
+    }
+    
+    .message-content a {
+        color: #0d6efd;
+        text-decoration: underline;
+    }
+    
+    .message.user .message-content a {
+        color: #cfe2ff;
+    }
+    
+    .suggestions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .suggestion-btn {
+        background: #e9ecef;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .suggestion-btn:hover {
+        background: #0d6efd;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .chat-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+    
+    .chat-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.35rem 0.75rem;
+        background: #e8f4ff;
+        color: #0d6efd;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        transition: all 0.2s;
+    }
+    
+    .chat-link:hover {
+        background: #0d6efd;
+        color: white;
+    }
+    
+    .chat-input-container {
+        padding: 1rem 1.5rem;
+        background: white;
+        border-top: 1px solid #e9ecef;
+        border-radius: 0 0 1rem 1rem;
+    }
+    
+    .chat-input-wrapper {
+        display: flex;
+        gap: 0.75rem;
+        align-items: flex-end;
+    }
+    
+    .chat-input {
+        flex: 1;
+        border: 2px solid #e9ecef;
+        border-radius: 1.5rem;
+        padding: 0.75rem 1.25rem;
+        font-size: 1rem;
+        resize: none;
+        min-height: 48px;
+        max-height: 120px;
+        transition: border-color 0.2s;
+    }
+    
+    .chat-input:focus {
+        outline: none;
+        border-color: var(--hirehub-primary, #0d6efd);
+    }
+    
+    .send-btn {
+        width: 48px;
+        height: 48px;
+        border: none;
+        border-radius: 50%;
+        background: var(--hirehub-primary, #0d6efd);
+        color: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .send-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(13, 110, 253, 0.4);
+    }
+    
+    .send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .typing-indicator {
+        display: none;
+        padding: 1rem;
+    }
+    
+    .typing-indicator.show {
+        display: flex;
+    }
+    
+    .typing-dots {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+        background: white;
+        padding: 0.75rem 1rem;
+        border-radius: 1rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    
+    .typing-dots span {
+        width: 8px;
+        height: 8px;
+        background: var(--hirehub-primary, #0d6efd);
+        border-radius: 50%;
+        animation: bounce 1.4s infinite ease-in-out;
+    }
+    
+    .typing-dots span:nth-child(1) { animation-delay: 0s; }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    
+    @keyframes bounce {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-8px); }
+    }
+    
+    .quick-topics {
+        text-align: center;
+        padding: 1rem;
+        background: #f8f9fa;
+    }
+    
+    .quick-topics h6 {
+        color: #6c757d;
+        margin-bottom: 0.75rem;
+    }
+    
+    /* Markdown styling */
+    .message-content strong {
+        font-weight: 600;
+    }
+    
+    .message-content ul, .message-content ol {
+        margin: 0.5rem 0;
+        padding-left: 1.5rem;
+    }
+    
+    .message-content li {
+        margin-bottom: 0.25rem;
+    }
+    
+    .message-content hr {
+        margin: 0.75rem 0;
+        border: none;
+        border-top: 1px solid #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Chat Header -->
+    <div class="chat-header">
+        <div class="chat-avatar">
+            <i class="bi bi-robot"></i>
+        </div>
+        <div>
+            <h5 class="mb-0">HireHub Assistant</h5>
+            <div class="chat-status">
+                <span class="status-dot"></span>
+                <span>Online - Ready to help</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat Messages -->
+    <div class="chat-messages" id="chatMessages">
+        <!-- Welcome Message -->
+        <div class="message bot">
+            <div class="message-avatar">
+                <i class="bi bi-robot"></i>
+            </div>
+            <div class="message-content">
+                <p>Hello{% if user.is_authenticated %} {{ user.username }}{% endif %}! 👋 I'm your HireHub Assistant.</p>
+                <p>I can help you with job searching, applications, profile updates, interview tips, and more. What would you like to know?</p>
+                <div class="suggestions" id="initialSuggestions">
+                    <button class="suggestion-btn" onclick="sendSuggestion('Find jobs')">🔍 Find Jobs</button>
+                    <button class="suggestion-btn" onclick="sendSuggestion('How to apply')">📝 How to Apply</button>
+                    <button class="suggestion-btn" onclick="sendSuggestion('Interview tips')">💼 Interview Tips</button>
+                    <button class="suggestion-btn" onclick="sendSuggestion('Help')">❓ Help</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Typing Indicator -->
+        <div class="message bot typing-indicator" id="typingIndicator">
+            <div class="message-avatar">
+                <i class="bi bi-robot"></i>
+            </div>
+            <div class="typing-dots">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat Input -->
+    <div class="chat-input-container">
+        <div class="chat-input-wrapper">
+            <textarea 
+                class="chat-input" 
+                id="chatInput" 
+                placeholder="Type your message here..."
+                rows="1"
+                onkeydown="handleKeyDown(event)"
+            ></textarea>
+            <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const sendBtn = document.getElementById('sendBtn');
+const typingIndicator = document.getElementById('typingIndicator');
+
+// Auto-resize textarea
+chatInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+function handleKeyDown(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+}
+
+function sendSuggestion(text) {
+    chatInput.value = text;
+    sendMessage();
+}
+
+function addMessage(content, isUser = false, suggestions = [], links = []) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+    
+    // Convert markdown-like formatting
+    let formattedContent = content
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>')
+        .replace(/\n/g, '<br>');
+    
+    let html = `
+        <div class="message-avatar">
+            <i class="bi bi-${isUser ? 'person-fill' : 'robot'}"></i>
+        </div>
+        <div class="message-content">
+            <p>${formattedContent}</p>
+    `;
+    
+    // Add links if any
+    if (links && links.length > 0) {
+        html += '<div class="chat-links">';
+        links.forEach(link => {
+            html += `<a href="${link.url}" class="chat-link"><i class="bi bi-arrow-right-circle"></i> ${link.text}</a>`;
+        });
+        html += '</div>';
+    }
+    
+    // Add suggestions if any
+    if (suggestions && suggestions.length > 0 && !isUser) {
+        html += '<div class="suggestions">';
+        suggestions.forEach(suggestion => {
+            html += `<button class="suggestion-btn" onclick="sendSuggestion('${suggestion}')">${suggestion}</button>`;
+        });
+        html += '</div>';
+    }
+    
+    html += '</div>';
+    messageDiv.innerHTML = html;
+    
+    // Insert before typing indicator
+    chatMessages.insertBefore(messageDiv, typingIndicator);
+    scrollToBottom();
+}
+
+function showTyping() {
+    typingIndicator.classList.add('show');
+    scrollToBottom();
+}
+
+function hideTyping() {
+    typingIndicator.classList.remove('show');
+}
+
+function scrollToBottom() {
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+async function sendMessage() {
+    const message = chatInput.value.trim();
+    if (!message) return;
+    
+    // Clear input
+    chatInput.value = '';
+    chatInput.style.height = 'auto';
+    
+    // Add user message
+    addMessage(message, true);
+    
+    // Show typing indicator
+    showTyping();
+    sendBtn.disabled = true;
+    
+    try {
+        const response = await fetch('{% url "chatbot_api" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({ message: message })
+        });
+        
+        const data = await response.json();
+        
+        // Simulate typing delay
+        await new Promise(resolve => setTimeout(resolve, 500 + Math.random() * 1000));
+        
+        hideTyping();
+        
+        if (data.success) {
+            addMessage(
+                data.response.message, 
+                false, 
+                data.response.suggestions || [],
+                data.response.links || []
+            );
+        } else {
+            addMessage("I'm sorry, I encountered an error. Please try again.", false);
+        }
+    } catch (error) {
+        hideTyping();
+        addMessage("I'm sorry, I couldn't connect to the server. Please check your connection and try again.", false);
+    }
+    
+    sendBtn.disabled = false;
+    chatInput.focus();
+}
+
+// Focus input on load
+chatInput.focus();
+</script>
+{% endblock %}

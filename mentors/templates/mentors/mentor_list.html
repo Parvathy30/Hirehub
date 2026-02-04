@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Mentors - HireHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Available Mentors</h2>
+    </div>
+</div>
+
+<div class="row">
+    {% for mentor in mentors %}
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">{{ mentor.user.username }}</h5>
+                {% if mentor.expertise %}
+                    <p class="card-text"><strong>Expertise:</strong> {{ mentor.expertise|truncatewords:15 }}</p>
+                {% endif %}
+                {% if mentor.available_time %}
+                    <p class="card-text"><strong>Available:</strong> {{ mentor.available_time }}</p>
+                {% endif %}
+                <a href="{% url 'request_mentorship' mentor.id %}" class="btn btn-primary">Request Mentorship</a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <p class="text-center text-muted">No mentors available at the moment.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+

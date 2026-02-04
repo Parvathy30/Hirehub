@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block title %}Job Provider Dashboard - HireHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="bi bi-speedometer2"></i> Job Provider Dashboard</h2>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="text-muted mb-1">My Jobs</h5>
+                <h3 class="mb-0 text-primary">{{ jobs|length }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="text-muted mb-1">Applications</h5>
+                <h3 class="mb-0 text-primary">{{ total_applications }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <h5 class="text-muted mb-1">Pending</h5>
+                <h3 class="mb-0 text-warning">{{ pending_applications }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-12">
+        <a href="{% url 'create_job' %}" class="btn btn-primary"><i class="bi bi-plus-circle me-1"></i> Post Job</a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-briefcase me-2"></i>My Job Posts</h5>
+            </div>
+            <div class="card-body">
+                {% if jobs %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Job Title</th>
+                                    <th>Company</th>
+                                    <th>Status</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for job in jobs %}
+                                <tr>
+                                    <td>{{ job.title }}</td>
+                                    <td>{{ job.company.name }}</td>
+                                    <td>
+                                        {% if job.is_verified %}
+                                            <span class="badge bg-success">Verified</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending Verification</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ job.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        <a href="{% url 'job_applicants' job.id %}" class="btn btn-sm btn-info">View Applicants</a>
+                                        <a href="{% url 'edit_job' job.id %}" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="{% url 'delete_job' job.id %}" class="btn btn-sm btn-danger">Delete</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted">You haven't posted any jobs yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

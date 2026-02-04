@@ -1,0 +1,286 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ job.title }} - HireHub{% endblock %}
+
+{% block extra_css %}
+<style>
+    .verified-badge-lg {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .skill-match-card {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+    }
+    .skill-match-percentage {
+        font-size: 3rem;
+        font-weight: 700;
+    }
+    .skill-tag {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        margin: 0.25rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+    }
+    .skill-tag.matched {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #28a745;
+    }
+    .skill-tag.not-matched {
+        background: #f8f9fa;
+        color: #6c757d;
+        border: 1px solid #dee2e6;
+    }
+    .job-meta-item {
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .job-meta-item:last-child {
+        border-bottom: none;
+    }
+    .job-meta-icon {
+        width: 40px;
+        height: 40px;
+        background: #f8f9fa;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: #0d6efd;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-1">{{ job.title }}</h3>
+                        <p class="mb-0 opacity-75">
+                            <i class="bi bi-building"></i> {{ job.company.name }}
+                        </p>
+                    </div>
+                    {% if job.is_verified %}
+                        <span class="verified-badge-lg">
+                            <i class="bi bi-patch-check-fill"></i> Admin Verified
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="card-body">
+                <!-- Job Meta Info -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="job-meta-item">
+                            <div class="job-meta-icon"><i class="bi bi-geo-alt"></i></div>
+                            <div>
+                                <small class="text-muted">Location</small>
+                                <p class="mb-0 fw-semibold">{{ job.location }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="job-meta-item">
+                            <div class="job-meta-icon"><i class="bi bi-briefcase"></i></div>
+                            <div>
+                                <small class="text-muted">Job Type</small>
+                                <p class="mb-0 fw-semibold">{{ job.get_job_type_display }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="job-meta-item">
+                            <div class="job-meta-icon"><i class="bi bi-cash"></i></div>
+                            <div>
+                                <small class="text-muted">Salary</small>
+                                <p class="mb-0 fw-semibold">{{ job.salary|default:"Not disclosed" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="job-meta-item">
+                            <div class="job-meta-icon"><i class="bi bi-clock-history"></i></div>
+                            <div>
+                                <small class="text-muted">Experience</small>
+                                <p class="mb-0 fw-semibold">{{ job.experience_required|default:"Not specified" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Job Description -->
+                <h5><i class="bi bi-file-text text-primary"></i> Job Description</h5>
+                <div class="mb-4">
+                    {{ job.description|linebreaks }}
+                </div>
+                
+                <!-- Skills Required -->
+                <h5><i class="bi bi-stars text-primary"></i> Skills Required</h5>
+                <div class="mb-4">
+                    {% for skill in job.skills_required.split %}
+                        {% if matching_skills %}
+                            {% if skill|lower in matching_skills %}
+                                <span class="skill-tag matched">
+                                    <i class="bi bi-check-circle-fill"></i> {{ skill|cut:"," }}
+                                </span>
+                            {% else %}
+                                <span class="skill-tag not-matched">{{ skill|cut:"," }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="skill-tag not-matched">{{ skill|cut:"," }}</span>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                
+                <!-- Posted Info -->
+                <div class="text-muted small">
+                    <i class="bi bi-calendar"></i> Posted on {{ job.created_at|date:"F d, Y" }}
+                    ({{ job.created_at|timesince }} ago)
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Skill Match Card (for job seekers) -->
+        {% if skill_match is not None %}
+        <div class="card skill-match-card mb-3">
+            <div class="card-body text-center">
+                <h6 class="text-white-50 mb-2">Your Skill Match</h6>
+                <div class="skill-match-percentage">{{ skill_match }}%</div>
+                <p class="mb-0 small">
+                    {% if skill_match >= 70 %}
+                        <i class="bi bi-emoji-smile"></i> Great match! You're a strong candidate.
+                    {% elif skill_match >= 40 %}
+                        <i class="bi bi-emoji-neutral"></i> Good match. Consider applying!
+                    {% else %}
+                        <i class="bi bi-emoji-frown"></i> Some skills may need development.
+                    {% endif %}
+                </p>
+                {% if matching_skills %}
+                <hr class="bg-white opacity-25">
+                <small class="text-white-50">
+                    {{ matching_skills|length }} of your skills match this job
+                </small>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Apply Card -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5><i class="bi bi-send text-success"></i> Apply for this Job</h5>
+                {% if user.is_authenticated %}
+                    {% if user.profile.role == 'seeker' %}
+                        {% if has_applied %}
+                            <div class="alert alert-info mb-0">
+                                <i class="bi bi-check-circle-fill"></i> You have already applied!
+                                <a href="{% url 'seeker_dashboard' %}" class="d-block mt-2">
+                                    View Application Status <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        {% else %}
+                            <p class="text-muted small">
+                                Submit your application and let your skills speak for you.
+                            </p>
+                            <a href="{% url 'apply_job' job.id %}" class="btn btn-success w-100 btn-lg">
+                                <i class="bi bi-send-fill"></i> Apply Now
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <div class="alert alert-warning mb-0">
+                            <i class="bi bi-info-circle"></i> Only job seekers can apply for jobs.
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <p class="text-muted small">
+                        Please login or register as a job seeker to apply for this position.
+                    </p>
+                    <a href="{% url 'login' %}" class="btn btn-primary w-100 mb-2">
+                        <i class="bi bi-box-arrow-in-right"></i> Login
+                    </a>
+                    <a href="{% url 'register' %}" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-person-plus"></i> Register
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Company Info Card -->
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5>
+                    <i class="bi bi-building text-primary"></i> About the Company
+                    {% if job.company.is_verified %}
+                        <i class="bi bi-patch-check-fill text-success" title="Verified Company"></i>
+                    {% endif %}
+                </h5>
+                <h6 class="fw-bold">{{ job.company.name }}</h6>
+                {% if job.company.industry %}
+                    <p class="text-muted small mb-2">
+                        <i class="bi bi-diagram-3"></i> {{ job.company.industry }}
+                    </p>
+                {% endif %}
+                {% if job.company.location %}
+                    <p class="text-muted small mb-2">
+                        <i class="bi bi-geo-alt"></i> {{ job.company.location }}
+                    </p>
+                {% endif %}
+                <p class="small">{{ job.company.description|truncatewords:30|default:"No description available." }}</p>
+                <a href="{% url 'company_detail' job.company.id %}" class="btn btn-outline-primary btn-sm w-100">
+                    <i class="bi bi-arrow-right"></i> View Company Profile
+                </a>
+            </div>
+        </div>
+        
+        <!-- Report Job Card -->
+        {% if user.is_authenticated %}
+        <div class="card border-danger">
+            <div class="card-body">
+                <h6 class="text-danger"><i class="bi bi-flag"></i> Report this Job</h6>
+                <p class="small text-muted mb-2">
+                    Think this job posting is fake or suspicious?
+                </p>
+                {% if has_reported %}
+                    <div class="alert alert-secondary small mb-0">
+                        <i class="bi bi-check"></i> You've reported this job. Our team is reviewing it.
+                    </div>
+                {% else %}
+                    <a href="{% url 'report_job' job.id %}" class="btn btn-outline-danger btn-sm">
+                        <i class="bi bi-flag-fill"></i> Report Job
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Back Button -->
+<div class="mt-4">
+    <a href="{% url 'job_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Back to Job Listings
+    </a>
+</div>
+{% endblock %}
+

@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+
+{% block title %}Application Status - HireHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="mb-0">Application Status</h3>
+            </div>
+            <div class="card-body">
+                <h5>{{ application.job.title }}</h5>
+                <p><strong>Company:</strong> {{ application.job.company.name }}</p>
+                <p><strong>Applied Date:</strong> {{ application.applied_at|date:"F d, Y" }}</p>
+                
+                <div class="mb-3">
+                    <strong>Status:</strong>
+                    {% if application.status == 'pending' %}
+                        <span class="badge bg-warning badge-status">Pending</span>
+                    {% elif application.status == 'accepted' %}
+                        <span class="badge bg-success badge-status">Accepted</span>
+                    {% else %}
+                        <span class="badge bg-danger badge-status">Rejected</span>
+                    {% endif %}
+                </div>
+                
+                {% if application.cover_letter %}
+                    <div class="mb-3">
+                        <strong>Cover Letter:</strong>
+                        <p>{{ application.cover_letter|linebreaks }}</p>
+                    </div>
+                {% endif %}
+                
+                {% if application.resume %}
+                    <div class="mb-3">
+                        <strong>Resume:</strong>
+                        <br><a href="{{ application.resume.url }}" target="_blank" class="btn btn-sm btn-outline-primary">View Resume</a>
+                    </div>
+                {% endif %}
+                
+                <a href="{% url 'seeker_dashboard' %}" class="btn btn-primary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

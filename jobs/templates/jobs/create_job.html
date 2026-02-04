@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Post New Job - HireHub{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h3 class="mb-0">Post New Job</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="id_company" class="form-label">Company *</label>
+                        {{ form.company }}
+                        {% if form.company.errors %}
+                            <div class="text-danger">{{ form.company.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_title" class="form-label">Job Title *</label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                            <div class="text-danger">{{ form.title.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Job Description *</label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger">{{ form.description.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_skills_required" class="form-label">Skills Required *</label>
+                        {{ form.skills_required }}
+                        {% if form.skills_required.errors %}
+                            <div class="text-danger">{{ form.skills_required.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="id_location" class="form-label">Location *</label>
+                            {{ form.location }}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="id_job_type" class="form-label">Job Type *</label>
+                            {{ form.job_type }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_salary" class="form-label">Salary</label>
+                        {{ form.salary }}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Post Job</button>
+                    <a href="{% url 'provider_dashboard' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Mentorship Requests - HireHub{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Mentorship Requests</h2>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                {% if requests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Seeker</th>
+                                    <th>Message</th>
+                                    <th>Requested Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requests %}
+                                <tr>
+                                    <td>{{ req.seeker.user.username }}</td>
+                                    <td>{{ req.message|truncatewords:15 }}</td>
+                                    <td>{{ req.requested_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if req.status == 'pending' %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% elif req.status == 'accepted' %}
+                                            <span class="badge bg-success">Accepted</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Rejected</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if req.status == 'pending' %}
+                                            <a href="{% url 'respond_to_request' req.id 'accept' %}" class="btn btn-sm btn-success">Accept</a>
+                                            <a href="{% url 'respond_to_request' req.id 'reject' %}" class="btn btn-sm btn-danger">Reject</a>
+                                        {% endif %}
+                                        {% if req.status == 'accepted' %}
+                                            <a href="{% url 'create_session' req.id %}" class="btn btn-sm btn-primary">Schedule Session</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p class="text-center text-muted">No mentorship requests yet.</p>
+                {% endif %}
+                <div class="mt-3">
+                    <a href="{% url 'mentor_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

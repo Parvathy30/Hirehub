@@ -223,7 +223,7 @@ This is a college mini project for educational purposes.
 
 ## Author
 
-HireHub Development Team
+HireHub Development Team Members
 
 ---
 
